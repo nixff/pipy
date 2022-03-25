@@ -69,7 +69,7 @@ jobs:
           RELEASE_VERSION: ${{ needs.set-release-version.outputs.release_version }}
         run: |
           set -x
-          ./build.sh -gsp
+          ./build.sh -gsp -t ${RELEASE_VERSION}
           ls -l
           echo "::set-output name=artifact_name::$(ls *${RELEASE_VERSION}*.tar.gz)"
           echo "::set-output name=arch::$(uname -m)"
@@ -106,7 +106,7 @@ jobs:
           DOCKER_BUILDKIT: 1
           RELEASE_VERSION: ${{ needs.set-release-version.outputs.release_version }}
         run: |
-          ./build.sh -nsgcp
+          ./build.sh -nsgcp -t ${RELEASE_VERSION}
           ls -l
           echo "::set-output name=artifact_name::$(ls *${RELEASE_VERSION}*.tar.gz)"
           echo "::set-output name=arch::$(uname -m)"
@@ -143,7 +143,7 @@ jobs:
         env:
           RELEASE_VERSION: ${{ needs.set-release-version.outputs.release_version }}
         run: |
-          ./build.sh -sgp
+          ./build.sh -sgp -t ${RELEASE_VERSION}
           ls -l
           echo "::set-output name=artifact_name::$(ls *${RELEASE_VERSION}*.tar.gz)"
           echo "::set-output name=arch::$(uname -m)"
@@ -180,7 +180,7 @@ jobs:
           DOCKER_BUILDKIT: 1
           RELEASE_VERSION: ${{ needs.set-release-version.outputs.release_version }}
         run: |
-          ./build.sh -nsgcp
+          ./build.sh -nsgcp -t ${RELEASE_VERSION}
           ls -l
           echo "::set-output name=artifact_name::$(ls ${IMAGE}-${RELEASE_VERSION}.*.tar.gz)"
           echo "::set-output name=arch::$(uname -m)"
@@ -213,7 +213,7 @@ jobs:
         env:
           RELEASE_VERSION: ${{ needs.set-release-version.outputs.release_version }}
         run: |
-          ./build.sh -sgr
+          ./build.sh -sgr -t ${RELEASE_VERSION}
           ls -l
           echo "::set-output name=artifact_name::$(cd rpm; ls *.rpm)"
           echo "::set-output name=arch::$(uname -m)"
