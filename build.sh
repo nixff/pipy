@@ -217,7 +217,8 @@ if $BUILD_RPM; then
     --build-arg PIPY_GUI="$PIPY_GUI" \
     --build-arg PIPY_STATIC="$PIPY_STATIC" \
     -f $DOCKERFILE .
-  sudo docker run -it --rm -v $PIPY_DIR/rpm:/data pipy-pjs-rpmbuild:$RELEASE_VERSION bash -c "cp /rpm/*.rpm /data"
+
+  sudo docker run -rm -v $PIPY_DIR/rpm:/data pipy-pjs-rpmbuild:$RELEASE_VERSION bash -c "cp /rpm/*.rpm /data"
   git checkout -- $PIPY_DIR/rpm/pipy.spec
   rm -f $PIPY_DIR/rpm/pipy.tar.gz
 fi
@@ -233,13 +234,14 @@ if $BUILD_CONTAINER; then
 
   echo "Build image ${IMAGE}:$IMAGE_TAG"
   sudo docker build --rm -t ${IMAGE}:$IMAGE_TAG \
-  --build-arg VERSION=$VERSION \
-  --build-arg REVISION=$REVISION \
-  --build-arg COMMIT_ID=$COMMIT_ID \
-  --build-arg COMMIT_DATE="$COMMIT_DATE" \
-  --build-arg PIPY_GUI="$PIPY_GUI" \
-  --build-arg PIPY_STATIC="$PIPY_STATIC" \
-  -f $DOCKERFILE .
+    --network=host \
+    --build-arg VERSION=$VERSION \
+    --build-arg REVISION=$REVISION \
+    --build-arg COMMIT_ID=$COMMIT_ID \
+    --build-arg COMMIT_DATE="$COMMIT_DATE" \
+    --build-arg PIPY_GUI="$PIPY_GUI" \
+    --build-arg PIPY_STATIC="$PIPY_STATIC" \
+    -f $DOCKERFILE .
 
   if $PACKAGE_OUTPUTS; then
     docker save ${IMAGE}:$IMAGE_TAG | gzip > ${IMAGE##flomesh/}-${IMAGE_TAG}-alpine-${OS_ARCH}.tar.gz
