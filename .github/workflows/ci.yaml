@@ -213,7 +213,7 @@ jobs:
         env:
           RELEASE_VERSION: ${{ needs.set-release-version.outputs.release_version }}
         run: |
-          ./build.sh -gr -t ${RELEASE_VERSION}
+          ./build.sh -ngr -t ${RELEASE_VERSION}
           ls -l
           echo "::set-output name=artifact_name::$(cd rpm; ls *.rpm)"
           echo "::set-output name=arch::$(uname -m)"
