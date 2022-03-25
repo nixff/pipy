@@ -5,9 +5,8 @@ on:
   push:
 
 env:
-  pkg_prefix: /usr/local
-  pkg_confdir: /etc/pipy
-  IMAGE: pipy
+  IMAGE: flomesh/pipy-pjs
+  PKG_NAME: pipy-pjs
 
 defaults:
   run:
@@ -70,9 +69,9 @@ jobs:
           RELEASE_VERSION: ${{ needs.set-release-version.outputs.release_version }}
         run: |
           set -x
-          .github/workflows/ci.sh -b
+          ./build.sh -gsp
           ls -l
-          echo "::set-output name=artifact_name::$(ls pipy-${RELEASE_VERSION}.*.tar.gz)"
+          echo "::set-output name=artifact_name::$(ls *${RELEASE_VERSION}*.tar.gz)"
           echo "::set-output name=arch::$(uname -m)"
 
       - name: Upload artifacts
@@ -107,10 +106,9 @@ jobs:
           DOCKER_BUILDKIT: 1
           RELEASE_VERSION: ${{ needs.set-release-version.outputs.release_version }}
         run: |
-          .github/workflows/ci.sh -c
-          docker save ${IMAGE}:${RELEASE_VERSION}-$(uname -m) | gzip > ${IMAGE}-${RELEASE_VERSION}.alpine-$(uname -m).tar.gz
+          ./build.sh -nsgcp
           ls -l
-          echo "::set-output name=artifact_name::$(ls ${IMAGE}-${RELEASE_VERSION}.*.tar.gz)"
+          echo "::set-output name=artifact_name::$(ls *${RELEASE_VERSION}*.tar.gz)"
           echo "::set-output name=arch::$(uname -m)"
 
       - name: Upload artifacts
@@ -145,10 +143,9 @@ jobs:
         env:
           RELEASE_VERSION: ${{ needs.set-release-version.outputs.release_version }}
         run: |
-          set -x
-          .github/workflows/ci.sh -b
+          ./build.sh -sgp
           ls -l
-          echo "::set-output name=artifact_name::$(ls pipy-${RELEASE_VERSION}.*.tar.gz)"
+          echo "::set-output name=artifact_name::$(ls *${RELEASE_VERSION}*.tar.gz)"
           echo "::set-output name=arch::$(uname -m)"
 
       - name: Upload artifacts
@@ -183,8 +180,7 @@ jobs:
           DOCKER_BUILDKIT: 1
           RELEASE_VERSION: ${{ needs.set-release-version.outputs.release_version }}
         run: |
-          .github/workflows/ci.sh -c
-          docker save ${IMAGE}:${RELEASE_VERSION}-$(uname -m) | gzip > ${IMAGE}-${RELEASE_VERSION}.alpine-$(uname -m).tar.gz
+          ./build.sh -nsgcp
           ls -l
           echo "::set-output name=artifact_name::$(ls ${IMAGE}-${RELEASE_VERSION}.*.tar.gz)"
           echo "::set-output name=arch::$(uname -m)"
@@ -217,10 +213,9 @@ jobs:
         env:
           RELEASE_VERSION: ${{ needs.set-release-version.outputs.release_version }}
         run: |
-          set -x
-          .github/workflows/ci.sh -p
+          ./build.sh -sgr
           ls -l
-          echo "::set-output name=artifact_name::$(cd rpm; ls pipy*.rpm)"
+          echo "::set-output name=artifact_name::$(cd rpm; ls *.rpm)"
           echo "::set-output name=arch::$(uname -m)"
 
       - name: Upload artifacts
