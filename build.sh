@@ -227,7 +227,7 @@ if $BUILD_CONTAINER; then
   if [[ "$RELEASE_VERSION" != "nightly"* ]]; then
     IMAGE_TAG=$RELEASE_VERSION
   else
-    IMAGE_TAG=$(date +%Y%m%d%H%M)
+    IMAGE_TAG=${RELEASE_VERSION##nightly-}
     IMAGE=${IMAGE}-nightly
   fi
 
