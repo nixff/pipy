@@ -218,7 +218,7 @@ if $BUILD_RPM; then
     --build-arg PIPY_STATIC="$PIPY_STATIC" \
     -f $DOCKERFILE .
 
-  sudo docker run -rm -v $PIPY_DIR/rpm:/data pipy-pjs-rpmbuild:$RELEASE_VERSION bash -c "cp /rpm/*.rpm /data"
+  sudo docker run --rm -v $PIPY_DIR/rpm:/data pipy-pjs-rpmbuild:$RELEASE_VERSION bash -c "cp /rpm/*.rpm /data"
   git checkout -- $PIPY_DIR/rpm/pipy.spec
   rm -f $PIPY_DIR/rpm/pipy.tar.gz
 fi
