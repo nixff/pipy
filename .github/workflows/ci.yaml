@@ -51,7 +51,7 @@ jobs:
     needs: set-release-version
     name: x86-pipy-repo
     runs-on: ubuntu-latest
-    if: ! startsWith(needs.set-release-version.outputs.release_version, 'nightly')
+    if: ${{ ! startsWith(needs.set-release-version.outputs.release_version, 'nightly') }}
     steps:
       - uses: actions/checkout@v2
         with:
