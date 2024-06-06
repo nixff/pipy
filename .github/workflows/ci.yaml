@@ -97,6 +97,12 @@ jobs:
             s3cmd put ${{steps.build.outputs.artifact_name}} s3://${{ secrets.S3_BUCKET }}/${S3_PATH}/$(uname -m)/binary/${{steps.build.outputs.artifact_name}}
           fi
 
+      - name: Upload artifact to workflow
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{steps.build.outputs.artifact_name}}
+          path: ${{steps.build.outputs.artifact_name}}
+
     outputs:
       artifact_name: ${{steps.build.outputs.artifact_name}}
       arch: ${{steps.build.outputs.arch}}
@@ -196,6 +202,12 @@ jobs:
           else
             s3cmd put ${{steps.build.outputs.artifact_name}} s3://${{ secrets.S3_BUCKET }}/${S3_PATH}/$(uname -m)/binary/${{steps.build.outputs.artifact_name}}
           fi
+
+      - name: Upload artifact to workflow
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{steps.build.outputs.artifact_name}}
+          path: ${{steps.build.outputs.artifact_name}}
 
     outputs:
       artifact_name: ${{steps.build.outputs.artifact_name}}
@@ -298,9 +310,44 @@ jobs:
             s3cmd put rpm/${{steps.build.outputs.artifact_name}} s3://${{ secrets.S3_BUCKET }}/${S3_PATH}/$(uname -m)/rpm/${TARGET_FILE_NAME}
           fi
 
+      - name: Upload artifact to workflow
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{steps.build.outputs.artifact_name}}
+          path: ${{steps.build.outputs.artifact_name}}
+
     outputs:
       artifact_name: ${{steps.build.outputs.artifact_name}}
       arch: ${{steps.build.outputs.arch}}
+
+  create-release:
+    name: create release
+    runs-on: ubuntu-latest
+    if: ${{ !contains(steps.version.outputs.release_version, 'nightly') }}
+    needs:
+      - set-release-version
+      - x86-binary
+      - aarch64-binary
+      - x86-alpine-docker
+      - aarch64-alpine-docker
+      - x86-rpm
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+
+      - name: Check downloads
+        run: |
+          ls -alR
+
+      - name: Create draft release
+        id: create_release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          files: |
+            ${{ needs.x86-binary.outputs.artifact_name }}/${{ needs.x86-binary.outputs.artifact_name }}
+            ${{ needs.aarch64-binary.outputs.artifact_name }}/${{ needs.aarch64-binary.outputs.artifact_name }}
+            ${{ needs.x86-rpm.outputs.artifact_name }}/${{ needs.x86-rpm.outputs.artifact_name }}
 
   save-log:
     name: save log
@@ -312,6 +359,8 @@ jobs:
       - x86-alpine-docker
       - aarch64-alpine-docker
       - x86-rpm
+      - create-release
+    if: ${{ always() && !contains(join(needs.*.result, ','), 'failure') }}
     steps:
       - name: Save log
         uses: peter-evans/repository-dispatch@v3
@@ -321,13 +370,13 @@ jobs:
           event-type: save-log
           client-payload: |
             {
-                "github": ${{toJSON(github)}},
-                "release_version": "${{needs.set-release-version.outputs.release_version}}",
-                "artifacts": [
-                  { "type": "rpm", "arch": "${{needs.x86-rpm.outputs.arch}}", "name": "${{ needs.x86-rpm.outputs.artifact_name }}" },
-                  { "type": "binary", "arch": "${{needs.x86-binary.outputs.arch}}", "name": "${{ needs.x86-binary.outputs.artifact_name }}" },
-                  { "type": "binary", "arch": "${{needs.aarch64-binary.outputs.arch}}", "name": "${{ needs.aarch64-binary.outputs.artifact_name }}" },
-                  { "type": "image", "arch": "${{needs.x86-alpine-docker.outputs.arch}}", "name": "${{ needs.x86-alpine-docker.outputs.artifact_name }}" },
-                  { "type": "image", "arch": "${{needs.aarch64-alpine-docker.outputs.arch}}", "name": "${{ needs.aarch64-alpine-docker.outputs.artifact_name }}" }
-                ]
-             }
+               "github": ${{toJSON(github)}},
+               "release_version": "${{needs.set-release-version.outputs.release_version}}",
+               "artifacts": [
+                 { "type": "rpm", "arch": "${{needs.x86-rpm.outputs.arch}}", "name": "${{ needs.x86-rpm.outputs.artifact_name }}" },
+                 { "type": "binary", "arch": "${{needs.x86-binary.outputs.arch}}", "name": "${{ needs.x86-binary.outputs.artifact_name }}" },
+                 { "type": "binary", "arch": "${{needs.aarch64-binary.outputs.arch}}", "name": "${{ needs.aarch64-binary.outputs.artifact_name }}" },
+                 { "type": "image", "arch": "${{needs.x86-alpine-docker.outputs.arch}}", "name": "${{ needs.x86-alpine-docker.outputs.artifact_name }}" },
+                 { "type": "image", "arch": "${{needs.aarch64-alpine-docker.outputs.arch}}", "name": "${{ needs.aarch64-alpine-docker.outputs.artifact_name }}" }
+               ]
+            }
