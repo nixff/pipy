@@ -326,7 +326,7 @@ jobs:
     if: ${{ !contains(needs.set-release-version.outputs.release_version, 'nightly') }}
     defaults:
       
-      working-directory: ""
+      working-directory: "."
     needs:
       - set-release-version
       - x86-binary
