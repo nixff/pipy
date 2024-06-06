@@ -336,7 +336,8 @@ jobs:
           RELEASE_VERSION: ${{ needs.set-release-version.outputs.release_version }}
         run: |
           set -x
-          xcode-select --install
+          export CC=$(brew --prefix llvm@15)/bin/clang
+          export CXX=$(brew --prefix llvm@15)/bin/clang++
           ./build.sh -p -t ${RELEASE_VERSION}
           ls -l
           echo "artifact_name=$(ls *${RELEASE_VERSION}*.tar.gz)" >> $GITHUB_OUTPUT

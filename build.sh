@@ -162,7 +162,11 @@ function __build_deps_check() {
   elif [ ! -z $(command -v cmake) ]; then
     export CMAKE=cmake
   fi
-  clang --version 2>&1 > /dev/null && clang++ --version 2>&1 > /dev/null && export __CLANG_EXIST=true
+
+  export CC=${CC:-clang}
+  export CXX=${CXX:-clang++}
+
+  $CC --version 2>&1 > /dev/null && $CXX --version 2>&1 > /dev/null && export __CLANG_EXIST=true
   if [ "x"$CMAKE = "x" ] || ! $__CLANG_EXIST ; then echo "Command \`cmake\` or \`clang\` not found." && exit -1; fi
   __NODE_VERSION=`node --version 2> /dev/null`
   version_compare "v12" "$__NODE_VERSION"
@@ -175,10 +179,7 @@ function __build_deps_check() {
 
 function build() {
   __build_deps_check
-  cd ${PIPY_DIR}
 
-  export CC=clang
-  export CXX=clang++
   cd ${PIPY_DIR}
   if [ $PIPY_GUI == "ON" ] ; then
     npm install
