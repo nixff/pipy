@@ -323,7 +323,7 @@ jobs:
   create-release:
     name: create release
     runs-on: ubuntu-latest
-    if: ${{ !contains(steps.version.outputs.release_version, 'nightly') }}
+    if: ${{ !contains(needs.set-release-version.outputs.release_version, 'nightly') }}
     needs:
       - set-release-version
       - x86-binary
