@@ -101,7 +101,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{steps.build.outputs.artifact_name}}
-          path: ${{steps.build.outputs.artifact_name}}
+          path: pipy/${{steps.build.outputs.artifact_name}}
 
     outputs:
       artifact_name: ${{steps.build.outputs.artifact_name}}
@@ -314,7 +314,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{steps.build.outputs.artifact_name}}
-          path: ${{steps.build.outputs.artifact_name}}
+          path: rpm/${{steps.build.outputs.artifact_name}}
 
     outputs:
       artifact_name: ${{steps.build.outputs.artifact_name}}
@@ -324,6 +324,9 @@ jobs:
     name: create release
     runs-on: ubuntu-latest
     if: ${{ !contains(needs.set-release-version.outputs.release_version, 'nightly') }}
+    defaults:
+      
+      working-directory: ""
     needs:
       - set-release-version
       - x86-binary
