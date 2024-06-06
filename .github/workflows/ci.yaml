@@ -323,7 +323,7 @@ jobs:
   x86-macos:
     needs: set-release-version
     name: x86-macos
-    runs-on: macos-latest
+    runs-on: macos-13
     steps:
       - uses: actions/checkout@v4
 
@@ -375,6 +375,61 @@ jobs:
       artifact_name: ${{steps.build.outputs.artifact_name}}
       arch: ${{steps.build.outputs.arch}}
 
+  # aarch64-macos:
+  #   needs: set-release-version
+  #   name: aarch64-macos
+  #   runs-on: macos-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+
+  #     - name: Show envs
+  #       run: export
+
+  #     - name: Build
+  #       id: build
+  #       env:
+  #         RELEASE_VERSION: ${{ needs.set-release-version.outputs.release_version }}
+  #       run: |
+  #         set -x
+  #         export CC=$(brew --prefix llvm@15)/bin/clang
+  #         export CXX=$(brew --prefix llvm@15)/bin/clang++
+  #         ./build.sh -p -t ${RELEASE_VERSION}
+  #         ls -l
+  #         echo "artifact_name=$(ls *${RELEASE_VERSION}*.tar.gz)" >> $GITHUB_OUTPUT
+  #         echo "arch=$(uname -m)" >> $GITHUB_OUTPUT
+
+  #     - name: Setup s3cmd
+  #       run: |
+  #         brew install s3cmd
+  #         cat > $HOME/.s3cfg << EOF
+  #         bucket_location = ${{ secrets.S3_REGION }}
+  #         host_base = ${{ secrets.S3_GLOBAL_ACC_HOST_BASE }}
+  #         host_bucket = %(bucket)s.${{ secrets.S3_GLOBAL_ACC_HOST_BASE}}
+  #         access_key = ${{ secrets.S3_ACCESS_KEY }}
+  #         secret_key = ${{ secrets.S3_SECRET_KEY }}
+  #         EOF
+
+  #     - name: Upload artifacts
+  #       env:
+  #         RELEASE_VERSION: ${{ needs.set-release-version.outputs.release_version }}
+  #       run: |
+  #         if [[ "$RELEASE_VERSION" == "nightly"* ]]
+  #         then
+  #           s3cmd put ${{steps.build.outputs.artifact_name}} s3://${{ secrets.S3_BUCKET }}/${S3_PATH}-nightly/$(uname -m)/binary/${{steps.build.outputs.artifact_name}}
+  #         else
+  #           s3cmd put ${{steps.build.outputs.artifact_name}} s3://${{ secrets.S3_BUCKET }}/${S3_PATH}/$(uname -m)/binary/${{steps.build.outputs.artifact_name}}
+  #         fi
+
+  #     - name: Upload artifact to workflow
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: ${{steps.build.outputs.artifact_name}}
+  #         path: ${{steps.build.outputs.artifact_name}}
+
+  #   outputs:
+  #     artifact_name: ${{steps.build.outputs.artifact_name}}
+  #     arch: ${{steps.build.outputs.arch}}
+
   create-release:
     name: create release
     runs-on: ubuntu-latest
@@ -387,6 +442,7 @@ jobs:
       # - aarch64-alpine-docker
       #- x86-rpm
       - x86-macos
+      # - aarch64-macos
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v4
@@ -416,6 +472,7 @@ jobs:
       # - aarch64-alpine-docker
       # - x86-rpm
       - x86-macos
+      # - aarch64-macos
       - create-release
     if: ${{ always() && !contains(join(needs.*.result, ','), 'failure') }}
     steps:
