@@ -15,7 +15,7 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then
   PHYS_DIR=$(pwd -P)
   RESULT=$PHYS_DIR/$TARGET_FILE
   PIPY_DIR=$(dirname $RESULT)
-  OS_NAME=darwin
+  OS_NAME=macos
 fi
 
 # Number of processors to build.
@@ -36,7 +36,7 @@ PKG_NAME=${PKG_NAME:-pipy}
 PIPY_STATIC=OFF
 PIPY_GUI=${PIPY_GUI:-OFF}
 
-OS_ARCH=$(uname -m)
+OS_ARCH=$(uname -m | sed 's#arm64#aarch64#g')
 ##### End Default environment variables #########
 
 SHORT_OPTS="crsgt:nhpd"
